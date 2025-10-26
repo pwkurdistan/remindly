@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Darker Orange Theme - Remindly AI */
-    --background: 20 30% 25%;
+    --background: 20 40% 25%;
     --foreground: 0 0% 100%;
 
     --card: 20 25% 30%;
@@ -64,7 +64,7 @@ All colors MUST be HSL.
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka:wght@700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka:wght@700&display=swap");
 
 @layer base {
   * {
