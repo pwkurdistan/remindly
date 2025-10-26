@@ -55,15 +55,19 @@ serve(async (req) => {
     // 4. Extract text from the file (OCR) - Using a placeholder for now
     const extracted_text = `Image uploaded: ${fileName}`;
 
-    // 5. Generate a vector embedding
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY not configured");
+    // 5. Generate a vector embedding using Lovable AI Gateway
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY not configured");
     }
 
-    const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+    const openai = new OpenAI({ 
+      apiKey: LOVABLE_API_KEY,
+      baseURL: "https://ai.gateway.lovable.dev/v1",
+    });
+    
     const embeddingResponse = await openai.embeddings.create({
-      model: "text-embedding-3-small",
+      model: "text-embedding-3-small", // This model is supported by the gateway
       input: `${comment}\n${extracted_text}`,
     });
     const embedding = embeddingResponse.data[0].embedding;
