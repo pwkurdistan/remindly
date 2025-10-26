@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         pacifico: ['Pacifico', 'cursive'],
+        fredoka: ['Fredoka', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

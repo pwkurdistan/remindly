@@ -8,50 +8,50 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Dark Orange Theme - Remindly AI */
-    --background: 25 35% 92%;
-    --foreground: 25 20% 20%;
+    /* Darker Orange Theme - Remindly AI */
+    --background: 20 30% 25%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 25 20% 20%;
+    --card: 20 25% 30%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 25 20% 20%;
+    --popover: 20 25% 30%;
+    --popover-foreground: 0 0% 100%;
 
-    /* Dark Orange primary */
-    --primary: 25 85% 50%;
+    /* Darker Orange primary */
+    --primary: 20 60% 45%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 30 80% 65%;
+    --primary-light: 25 65% 55%;
 
-    /* Warm Coral secondary */
-    --secondary: 15 75% 60%;
+    /* Pink/Coral secondary */
+    --secondary: 340 70% 65%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 20 70% 75%;
+    --secondary-light: 340 75% 75%;
 
-    --muted: 25 25% 85%;
-    --muted-foreground: 25 15% 45%;
+    --muted: 20 20% 35%;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 25 40% 88%;
-    --accent-foreground: 25 20% 25%;
+    --accent: 20 30% 40%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 25 20% 85%;
-    --input: 25 20% 85%;
-    --ring: 25 85% 50%;
+    --border: 20 20% 40%;
+    --input: 20 20% 40%;
+    --ring: 20 60% 45%;
 
     --radius: 1.5rem;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(25 85% 50%), hsl(15 75% 60%));
-    --gradient-soft: linear-gradient(180deg, hsl(25 35% 95%), hsl(25 35% 92%));
-    --gradient-card: linear-gradient(135deg, hsl(25 85% 50% / 0.1), hsl(15 75% 60% / 0.1));
+    --gradient-primary: linear-gradient(180deg, hsl(20 35% 35%), hsl(20 30% 25%));
+    --gradient-soft: linear-gradient(180deg, hsl(20 30% 30%), hsl(20 30% 25%));
+    --gradient-card: linear-gradient(135deg, hsl(20 60% 45% / 0.1), hsl(340 70% 65% / 0.1));
 
     /* Shadows */
-    --shadow-soft: 0 2px 12px hsl(25 85% 50% / 0.08);
-    --shadow-medium: 0 4px 20px hsl(25 85% 50% / 0.12);
-    --shadow-glow: 0 8px 32px hsl(15 75% 60% / 0.3);
+    --shadow-soft: 0 2px 12px hsl(20 60% 20% / 0.3);
+    --shadow-medium: 0 4px 20px hsl(20 60% 20% / 0.4);
+    --shadow-glow: 0 8px 32px hsl(340 70% 65% / 0.3);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 25 20% 25%;
@@ -64,7 +64,7 @@ All colors MUST be HSL.
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka:wght@700&display=swap');
 
 @layer base {
   * {

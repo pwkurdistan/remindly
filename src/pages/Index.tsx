@@ -23,23 +23,29 @@ const Index = () => {
 
         {/* Hero Text */}
         <div className="space-y-4 animate-fade-in">
-          <h1 className="text-6xl font-bold text-white tracking-tight">
+          <h1 className="text-6xl font-fredoka font-bold text-white tracking-tight">
             Remindly
           </h1>
-          <p className="text-white/90 text-lg leading-relaxed px-4">
+          <p className="text-white/80 text-base leading-relaxed px-4">
             Store, organize, and recall your memories instantly with AI. Upload photos, documents, and notes.
           </p>
         </div>
       </div>
 
-      {/* CTA Button */}
-      <div className="z-10 w-full max-w-md mx-auto animate-fade-in">
-        <Button onClick={() => navigate("/auth")} size="lg" className="w-full h-16 text-lg rounded-full bg-white/20 hover:bg-white/30 text-white border-2 border-white/30 backdrop-blur-sm shadow-glow transition-all duration-300 hover:scale-105">
-          <span className="flex items-center justify-center gap-3">
+      {/* CTA Button - iPhone Switch Style */}
+      <div className="z-10 w-full max-w-md mx-auto animate-fade-in px-6">
+        <button 
+          onClick={() => navigate("/auth")} 
+          className="relative w-full h-16 rounded-full bg-secondary/40 backdrop-blur-sm shadow-glow transition-all duration-300 hover:scale-105 group overflow-hidden"
+        >
+          <div className="absolute inset-0 rounded-full bg-secondary/60"></div>
+          <div className="absolute left-2 top-2 bottom-2 w-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1">
+            <ArrowRight className="w-5 h-5 text-primary" />
+          </div>
+          <span className="relative text-white text-lg font-semibold pl-16">
             Continue
-            <ArrowRight className="w-5 h-5" />
           </span>
-        </Button>
+        </button>
       </div>
     </div>;
 };
