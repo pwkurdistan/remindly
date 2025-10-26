@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import memoryIcon from "@/assets/memory-icon.png";
+import rewindLogo from "@/assets/rewind-logo.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -37,9 +37,9 @@ const Index = () => {
         {/* Icon/Image */}
         <div className="mb-8 animate-fade-in">
           <img 
-            src={memoryIcon} 
-            alt="Remindly AI Memory Icon" 
-            className="w-48 h-48 object-contain drop-shadow-glow"
+            src={rewindLogo} 
+            alt="Remindly AI Rewind Logo" 
+            className="w-48 h-48 object-contain drop-shadow-glow animate-pulse"
           />
         </div>
 

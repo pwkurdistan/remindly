@@ -8,59 +8,59 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Mauve & Pink Theme - Remindly AI */
-    --background: 340 30% 92%;
-    --foreground: 340 15% 25%;
+    /* Dark Orange Theme - Remindly AI */
+    --background: 25 35% 92%;
+    --foreground: 25 20% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 340 15% 25%;
+    --card-foreground: 25 20% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 340 15% 25%;
+    --popover-foreground: 25 20% 20%;
 
-    /* Mauve primary */
-    --primary: 340 25% 45%;
+    /* Dark Orange primary */
+    --primary: 25 85% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 340 25% 65%;
+    --primary-light: 30 80% 65%;
 
-    /* Pink secondary */
-    --secondary: 340 50% 60%;
+    /* Warm Coral secondary */
+    --secondary: 15 75% 60%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 340 50% 75%;
+    --secondary-light: 20 70% 75%;
 
-    --muted: 340 20% 85%;
-    --muted-foreground: 340 10% 50%;
+    --muted: 25 25% 85%;
+    --muted-foreground: 25 15% 45%;
 
-    --accent: 340 30% 88%;
-    --accent-foreground: 340 15% 30%;
+    --accent: 25 40% 88%;
+    --accent-foreground: 25 20% 25%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 340 15% 85%;
-    --input: 340 15% 85%;
-    --ring: 340 25% 45%;
+    --border: 25 20% 85%;
+    --input: 25 20% 85%;
+    --ring: 25 85% 50%;
 
     --radius: 1.5rem;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(340 25% 45%), hsl(340 50% 60%));
-    --gradient-soft: linear-gradient(180deg, hsl(340 30% 95%), hsl(340 30% 92%));
-    --gradient-card: linear-gradient(135deg, hsl(340 25% 45% / 0.1), hsl(340 50% 60% / 0.1));
+    --gradient-primary: linear-gradient(135deg, hsl(25 85% 50%), hsl(15 75% 60%));
+    --gradient-soft: linear-gradient(180deg, hsl(25 35% 95%), hsl(25 35% 92%));
+    --gradient-card: linear-gradient(135deg, hsl(25 85% 50% / 0.1), hsl(15 75% 60% / 0.1));
 
     /* Shadows */
-    --shadow-soft: 0 2px 12px hsl(340 25% 45% / 0.08);
-    --shadow-medium: 0 4px 20px hsl(340 25% 45% / 0.12);
-    --shadow-glow: 0 8px 32px hsl(340 50% 60% / 0.3);
+    --shadow-soft: 0 2px 12px hsl(25 85% 50% / 0.08);
+    --shadow-medium: 0 4px 20px hsl(25 85% 50% / 0.12);
+    --shadow-glow: 0 8px 32px hsl(15 75% 60% / 0.3);
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 340 15% 30%;
-    --sidebar-primary: 340 25% 45%;
+    --sidebar-foreground: 25 20% 25%;
+    --sidebar-primary: 25 85% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 340 20% 90%;
-    --sidebar-accent-foreground: 340 15% 30%;
-    --sidebar-border: 340 15% 85%;
-    --sidebar-ring: 340 25% 45%;
+    --sidebar-accent: 25 25% 90%;
+    --sidebar-accent-foreground: 25 20% 25%;
+    --sidebar-border: 25 20% 85%;
+    --sidebar-ring: 25 85% 50%;
   }
 }
 
