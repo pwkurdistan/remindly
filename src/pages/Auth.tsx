@@ -4,9 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, Camera, FolderOpen, Search } from "lucide-react";
 import { z } from "zod";
-import memoryIcon from "@/assets/memory-icon.png";
 
 const emailSchema = z.string().email("Invalid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -76,15 +74,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-soft flex flex-col items-center justify-center px-6 py-12">
-      {/* Hero Section */}
-      <div className="animate-fade-in mb-12 text-center">
-        <div className="w-24 h-24 flex items-center justify-center mx-auto mb-6">
-          <img src={memoryIcon} alt="Remindly AI" className="w-full h-full object-contain" />
-        </div>
-        <h1 className="text-5xl font-pacifico text-foreground mb-3">Remindly AI</h1>
-        <p className="text-muted-foreground text-lg">Your intelligent memory companion</p>
-      </div>
-
       {/* Auth Card */}
       <div className="w-full max-w-md">
         <div className="bg-card rounded-3xl p-8 shadow-medium border border-border">
@@ -126,30 +115,6 @@ const Auth = () => {
               required
               className="h-14 px-6 rounded-2xl bg-muted border-0 focus-visible:ring-primary"
             />
-
-            {/* Feature highlights for signup */}
-            {!isLogin && (
-              <div className="grid grid-cols-3 gap-4 py-4">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-2">
-                    <Camera className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <span className="text-sm text-muted-foreground font-medium">Capture</span>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-2">
-                    <FolderOpen className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <span className="text-sm text-muted-foreground font-medium">Organize</span>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-2">
-                    <Search className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <span className="text-sm text-muted-foreground font-medium">Recall</span>
-                </div>
-              </div>
-            )}
 
             <Button
               type="submit"

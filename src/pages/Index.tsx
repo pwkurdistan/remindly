@@ -1,15 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import rewindLogo from "@/assets/rewind-logo.png";
-import heroBrain from "@/assets/hero-brain.png";
 import { useState } from "react";
+import camera from "../assets/camera.png";
+
 const Index = () => {
   const navigate = useNavigate();
   const [dragPosition, setDragPosition] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+
   const handleDragStart = () => {
     setIsDragging(true);
   };
+
   const handleDrag = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDragging) return;
     const button = (e.target as HTMLElement).closest('.drag-button');
@@ -18,63 +20,79 @@ const Index = () => {
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const position = Math.max(0, Math.min(clientX - rect.left - 28, rect.width - 56));
     setDragPosition(position);
+
     if (position >= rect.width - 70) {
       navigate("/auth");
     }
   };
+
   const handleDragEnd = () => {
     setIsDragging(false);
     setDragPosition(0);
   };
-  return <div className="min-h-screen bg-gradient-primary flex flex-col items-center justify-between px-6 py-12 relative overflow-hidden">
+
+  return (
+    <div className="min-h-screen bg-primary flex flex-col items-center justify-between px-6 py-12 relative overflow-hidden">
+      {/* Camera Image placeholder */}
+      <div className="flex-1 flex items-center justify-center z-10">
+        <img src={camera} alt="Camera" className="w-60 h-60 object-contain" />
+      </div>
+
       {/* Decorative waves */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-20">
-        <svg width="100%" height="200" viewBox="0 0 1440 200" className="absolute top-1/3">
-          <path d="M0,100 Q360,50 720,100 T1440,100" fill="none" stroke="white" strokeWidth="2" />
-          <path d="M0,120 Q360,70 720,120 T1440,120" fill="none" stroke="white" strokeWidth="2" />
-          <path d="M0,140 Q360,90 720,140 T1440,140" fill="none" stroke="white" strokeWidth="2" />
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center opacity-20">
+        <svg width="100%" height="50" viewBox="0 0 1440 50">
+          <path d="M0,25 Q360,0 720,25 T1440,25" fill="none" stroke="white" strokeWidth="3" />
+        </svg>
+        <svg width="100%" height="50" viewBox="0 0 1440 50">
+          <path d="M0,25 Q360,50 720,25 T1440,25" fill="none" stroke="white" strokeWidth="3" />
+        </svg>
+        <svg width="100%" height="50" viewBox="0 0 1440 50">
+          <path d="M0,25 Q360,0 720,25 T1440,25" fill="none" stroke="white" strokeWidth="3" />
         </svg>
       </div>
 
       {/* Content */}
       <div className="flex-1 flex flex-col items-center justify-center z-10 space-y-6 max-w-md mx-auto text-center">
-        {/* Icon/Image */}
-        <div className="mb-4 animate-fade-in">
-          
-        </div>
-
-        {/* Camera Image */}
-        <div className="animate-fade-in">
-          
-        </div>
-
         {/* Hero Text */}
         <div className="space-y-3 animate-fade-in">
-          <h1 className="text-5xl font-fredoka font-bold text-white tracking-tight">Remindly AI</h1>
+          <h1 className="text-5xl font-fredoka font-bold text-white tracking-tight hidden">Remindly AI</h1>
           <p className="text-white/90 text-sm leading-relaxed px-6 font-medium">
             Store, organize, and recall your memories instantly with AI. Upload photos, documents, and notes.
           </p>
         </div>
       </div>
 
-      {/* CTA Button - Draggable iPhone Switch Style */}
+      {/* CTA Button */}
       <div className="z-10 w-full max-w-md mx-auto animate-fade-in px-6 pb-8">
-        <div className="drag-button relative w-full h-14 rounded-full bg-white/20 backdrop-blur-sm shadow-glow overflow-hidden cursor-pointer" onMouseDown={handleDragStart} onMouseMove={handleDrag} onMouseUp={handleDragEnd} onMouseLeave={handleDragEnd} onTouchStart={handleDragStart} onTouchMove={handleDrag} onTouchEnd={handleDragEnd}>
-          <div className="absolute inset-0 rounded-full bg-white/10"></div>
-          {/* Drag trail effect */}
-          <div className="absolute left-0 top-0 bottom-0 rounded-full bg-primary transition-all duration-100" style={{
-          width: `${dragPosition + 56}px`
-        }}></div>
-          <div className="absolute left-1 top-1 bottom-1 w-12 rounded-full bg-white shadow-lg flex items-center justify-center transition-transform duration-100 z-10" style={{
-          transform: `translateX(${dragPosition}px)`
-        }}>
-            <ArrowRight className="w-5 h-5 text-primary" />
+        <div
+          className="drag-button relative w-full h-16 rounded-full bg-primary-light shadow-lg overflow-hidden cursor-pointer"
+          onMouseDown={handleDragStart}
+          onMouseMove={handleDrag}
+          onMouseUp={handleDragEnd}
+          onMouseLeave={handleDragEnd}
+          onTouchStart={handleDragStart}
+          onTouchMove={handleDrag}
+          onTouchEnd={handleDragEnd}
+        >
+          <div className="relative w-full h-full flex items-center">
+            <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-xl z-10">
+                Continue
+            </span>
+
+            {/* The combined moving element */}
+            <div
+                className="absolute top-1 left-1 h-14 rounded-full bg-card z-20 flex items-center justify-end"
+                style={{ width: `${dragPosition + 56}px` }}
+            >
+                <div className="w-14 h-14 flex items-center justify-center">
+                    <ArrowRight className="w-6 h-6 text-white" />
+                </div>
+            </div>
           </div>
-          <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-2xl">
-            Continue
-          </span>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

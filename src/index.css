@@ -24,9 +24,9 @@ All colors MUST be HSL.
     --primary-light: 340 30% 55%;
 
     /* Lighter rose secondary */
-    --secondary: 340 30% 60%;
+    --secondary: 340 70% 71%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 340 35% 70%;
+    --secondary-light: 340 70% 81%;
 
     --muted: 340 20% 35%;
     --muted-foreground: 0 0% 75%;
@@ -47,6 +47,7 @@ All colors MUST be HSL.
     --gradient-primary: linear-gradient(180deg, hsl(340 25% 45%), hsl(340 30% 60%));
     --gradient-soft: linear-gradient(180deg, hsl(340 28% 50%), hsl(340 32% 65%));
     --gradient-card: linear-gradient(135deg, hsl(340 25% 45% / 0.1), hsl(340 30% 60% / 0.1));
+    --gradient-button-pink: linear-gradient(180deg, hsl(340, 80%, 80%), hsl(340, 70%, 70%));
 
     /* Shadows */
     --shadow-soft: 0 2px 12px hsl(340 25% 20% / 0.3);
