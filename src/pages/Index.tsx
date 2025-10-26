@@ -89,8 +89,13 @@ const Index = () => {
           onTouchEnd={handleDragEnd}
         >
           <div className="absolute inset-0 rounded-full bg-white/10"></div>
+          {/* Drag trail effect */}
           <div 
-            className="absolute left-1 top-1 bottom-1 w-12 rounded-full bg-white shadow-lg flex items-center justify-center transition-transform duration-100"
+            className="absolute left-0 top-0 bottom-0 rounded-full bg-primary transition-all duration-100"
+            style={{ width: `${dragPosition + 56}px` }}
+          ></div>
+          <div 
+            className="absolute left-1 top-1 bottom-1 w-12 rounded-full bg-white shadow-lg flex items-center justify-center transition-transform duration-100 z-10"
             style={{ transform: `translateX(${dragPosition}px)` }}
           >
             <ArrowRight className="w-5 h-5 text-primary" />
