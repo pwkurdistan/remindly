@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Dusty Rose Theme - Remindly - #8f5669 */
-    --background: 340 30% 25%;
+    --background: 340 25% 45%;
     --foreground: 0 0% 100%;
 
     --card: 340 25% 30%;
