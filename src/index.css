@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Darker Orange Theme - Remindly AI */
-    --background: 20 40% 25%;
+    --background: 20 20% 25%;
     --foreground: 0 0% 100%;
 
     --card: 20 25% 30%;
