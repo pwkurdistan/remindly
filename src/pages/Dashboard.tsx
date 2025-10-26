@@ -27,6 +27,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -105,6 +107,40 @@ const Dashboard = () => {
   const toggleProfileMenu = (event: React.MouseEvent) => {
     event.stopPropagation();
     setShowProfileMenu(!showProfileMenu);
+  };
+
+  const handleFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      toast({
+        title: "Files uploaded",
+        description: `${files.length} file(s) selected successfully.`,
+      });
+      // Here you would handle the actual file upload to Supabase storage
+    }
+  };
+
+  const handleCameraClick = () => {
+    cameraInputRef.current?.click();
+  };
+
+  const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      toast({
+        title: "Photo captured",
+        description: "Photo captured successfully.",
+      });
+      // Here you would handle the actual photo upload to Supabase storage
+    }
+  };
+
+  const handleChatbotClick = () => {
+    navigate("/chat");
   };
 
   if (loading) {
@@ -294,21 +330,49 @@ const Dashboard = () => {
           {/* Center Add Button */}
           <div className="absolute -top-7 left-1/2 transform -translate-x-1/2">
             <div className="rounded-full p-1.5" style={{ backgroundColor: '#f2e6eb' }}>
-              <Button size="icon" className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-glow">
+              <Button 
+                size="icon" 
+                className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-glow"
+                onClick={handleFileUpload}
+              >
                 <Plus className="w-7 h-7 text-white" />
               </Button>
             </div>
           </div>
 
+          {/* Hidden file inputs */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            multiple
+            accept="image/*,video/*"
+            onChange={handleFileChange}
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            className="hidden"
+            accept="image/*"
+            capture="environment"
+            onChange={handleCameraCapture}
+          />
+
           <div className="bg-primary rounded-[32px] shadow-medium">
             <div className="grid grid-cols-3 py-5 px-8">
-              <button className="flex flex-col items-center justify-center">
+              <button 
+                className="flex flex-col items-center justify-center hover:opacity-80 transition-opacity"
+                onClick={handleChatbotClick}
+              >
                 <Bot className="w-6 h-6 text-white" />
               </button>
               <div className="flex flex-col items-center justify-center">
                 {/* Spacer for center button */}
               </div>
-              <button className="flex flex-col items-center justify-center">
+              <button 
+                className="flex flex-col items-center justify-center hover:opacity-80 transition-opacity"
+                onClick={handleCameraClick}
+              >
                 <Camera className="w-6 h-6 text-white" />
               </button>
             </div>
