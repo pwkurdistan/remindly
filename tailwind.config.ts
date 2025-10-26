@@ -13,6 +13,17 @@ export default {
       },
     },
     extend: {
+      spacing: {
+        '68': '17rem',
+        '72': '18rem',
+        '76': '19rem',
+        '80': '20rem',
+        '84': '21rem',
+        '88': '22rem',
+        '92': '23rem',
+        '96': '24rem',
+        '100': '25rem',
+      },
       fontFamily: {
         pacifico: ['Pacifico', 'cursive'],
         fredoka: ['Fredoka', 'sans-serif'],

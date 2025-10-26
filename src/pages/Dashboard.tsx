@@ -1,71 +1,149 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
-import { Grid3x3, Search, Bell, Image as ImageIcon, Video, Play, Folder, Plus, Home, Camera, ArrowRight } from "lucide-react";
+import { Grid3x3, Bot, User, Image as ImageIcon, Video, Play, Folder, Plus, Camera, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import heroBrain from "@/assets/hero-brain.png";
 import memoryIcon from "@/assets/memory-icon.png";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 const Dashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showTalkBubble, setShowTalkBubble] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({
-      data: {
-        session
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
       }
-    }) => {
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    
+    const sessionSubscription = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      setLoading(false);
       if (!session) {
         navigate("/auth");
       }
     });
 
-    // Listen for auth changes
-    const {
-      data: {
-        subscription
-      }
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setLoading(false);
       if (!session) {
         navigate("/auth");
+      } else {
+        const justLoggedIn = sessionStorage.getItem('justLoggedIn');
+        if (justLoggedIn) {
+          setShowTalkBubble(true);
+          sessionStorage.removeItem('justLoggedIn');
+        }
       }
     });
-    return () => subscription.unsubscribe();
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      sessionSubscription.data.subscription.unsubscribe();
+    };
   }, [navigate]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast({
       title: "Signed out",
-      description: "You have been successfully signed out."
+      description: "You have been successfully signed out.",
     });
     navigate("/auth");
   };
+
+  const handleConfirmPasswordReset = async () => {
+    if (!user) return;
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email!);
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: "Password Reset Email Sent",
+        description: "Check your email for a link to reset your password.",
+      });
+    }
+    setShowPasswordConfirm(false);
+    setShowProfileMenu(false);
+  };
+  
+  const handleChangePasswordClick = () => {
+    setShowPasswordConfirm(true);
+  };
+
+  const handleScreenClick = () => {
+    if (showTalkBubble) {
+      setShowTalkBubble(false);
+    }
+  };
+
+  const toggleProfileMenu = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setShowProfileMenu(!showProfileMenu);
+  };
+
   if (loading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center">
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse">Loading...</div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen bg-background pb-24">
-      {/* Top Navigation */}
+
+  return (
+    <div className="min-h-screen pb-24" style={{ backgroundColor: '#f2e6eb' }} onClick={handleScreenClick}>
       <nav className="px-6 pt-6 pb-4">
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="icon" className="rounded-2xl w-12 h-12 bg-card hover:bg-card/80">
             <Grid3x3 className="w-5 h-5 text-foreground" />
           </Button>
-          <div className="flex items-center space-x-3">
-            
-            <Button variant="ghost" size="icon" className="rounded-full w-11 h-11 bg-card hover:bg-card/80">
-              <Bell className="w-5 h-5 text-foreground" />
+          <div className="relative flex items-center space-x-3" ref={profileMenuRef}>
+            <Button variant="ghost" size="icon" className="rounded-full w-11 h-11 bg-card hover:bg-card/80" onClick={toggleProfileMenu}>
+              <User className="w-5 h-5 text-foreground" />
             </Button>
+            {showProfileMenu && (
+              <div className="absolute top-16 right-0 rounded-2xl shadow-lg border w-48 z-20" style={{ backgroundColor: '#f2e6eb', borderColor: 'hsl(340 25% 30%)' }}>
+                <div className="p-2">
+                  <button
+                    onClick={handleChangePasswordClick}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-800 rounded-lg hover:bg-card hover:text-primary-foreground"
+                  >
+                    Change Password
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-800 rounded-lg hover:bg-card hover:text-primary-foreground"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </nav>
@@ -73,7 +151,7 @@ const Dashboard = () => {
       <main className="px-6 space-y-6">
         {/* Welcome Section */}
         <section className="animate-fade-in">
-          <h2 className="text-3xl font-normal text-foreground">
+          <h2 className="text-3xl font-normal text-gray-900">
             Welcome <span className="font-bold">{user?.email?.split('@')[0] || 'back'}</span>,
           </h2>
         </section>
@@ -115,8 +193,8 @@ const Dashboard = () => {
         {/* Collections Section */}
         <section className="animate-fade-in">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-foreground">Collections</h3>
-            <button className="text-muted-foreground text-sm hover:text-primary transition-colors">
+            <h3 className="text-xl font-bold text-gray-900">Collections</h3>
+            <button className="text-gray-900 text-sm hover:text-primary transition-colors">
               See all
             </button>
           </div>
@@ -156,8 +234,8 @@ const Dashboard = () => {
         {/* Folders Section */}
         <section className="animate-fade-in pb-8">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-foreground">Folders</h3>
-            <button className="text-muted-foreground text-sm hover:text-primary transition-colors">
+            <h3 className="text-xl font-bold text-gray-900">Folders</h3>
+            <button className="text-gray-900 text-sm hover:text-primary transition-colors">
               See all
             </button>
           </div>
@@ -178,12 +256,44 @@ const Dashboard = () => {
         </section>
       </main>
 
-      {/* Bottom Navigation with Center Add Button */}
+      <AlertDialog open={showPasswordConfirm} onOpenChange={setShowPasswordConfirm}>
+        <AlertDialogContent style={{ backgroundColor: '#f2e6eb', borderColor: 'hsl(340 25% 30%)' }}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-gray-800">Confirm Password Reset</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600">
+              Are you sure you want to send a password reset link to your email?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowProfileMenu(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmPasswordReset}>Yes, Send Link</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <nav className="fixed bottom-6 left-6 right-6 z-50">
         <div className="relative">
+          {/* AI Chatbot bubble */}
+          {showTalkBubble && (
+            <div
+              className="absolute bottom-full left-8 mb-3 w-48 p-3 rounded-xl shadow-lg border"
+              style={{ backgroundColor: '#f2e6eb', borderColor: 'hsl(340 25% 30%)' }}
+            >
+              <p className="text-sm text-gray-800">Upload your first memory and whenever you forget it I will help you remember.</p>
+              <div
+                className="absolute left-1/2 transform -translate-x-1/2 bottom-[-8px] w-0 h-0 border-t-8 border-l-8 border-l-transparent border-r-8 border-r-transparent"
+                style={{ borderTopColor: 'hsl(340 25% 30%)' }}
+              ></div>
+              <div
+                className="absolute left-1/2 transform -translate-x-1/2 bottom-[-7px] w-0 h-0 border-t-8 border-l-8 border-l-transparent border-r-8 border-r-transparent"
+                style={{ borderTopColor: '#f2e6eb' }}
+              ></div>
+            </div>
+          )}
+
           {/* Center Add Button */}
           <div className="absolute -top-7 left-1/2 transform -translate-x-1/2">
-            <div className="bg-background rounded-full p-1.5">
+            <div className="rounded-full p-1.5" style={{ backgroundColor: '#f2e6eb' }}>
               <Button size="icon" className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-glow">
                 <Plus className="w-7 h-7 text-white" />
               </Button>
@@ -193,7 +303,7 @@ const Dashboard = () => {
           <div className="bg-primary rounded-[32px] shadow-medium">
             <div className="grid grid-cols-3 py-5 px-8">
               <button className="flex flex-col items-center justify-center">
-                <Home className="w-6 h-6 text-white" />
+                <Bot className="w-6 h-6 text-white" />
               </button>
               <div className="flex flex-col items-center justify-center">
                 {/* Spacer for center button */}
@@ -205,6 +315,8 @@ const Dashboard = () => {
           </div>
         </div>
       </nav>
-    </div>;
+    </div>
+  );
 };
+
 export default Dashboard;

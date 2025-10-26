@@ -124,8 +124,9 @@ const Chat = () => {
                 className={`max-w-[80%] rounded-3xl px-6 py-4 ${
                   message.role === "user"
                     ? "bg-primary text-primary-foreground"
-                    : "bg-card border border-border text-foreground"
+                    : "text-gray-800 border"
                 }`}
+                style={message.role === "assistant" ? { backgroundColor: '#f2e6eb', borderColor: 'hsl(340 25% 30%)' } : {}}
               >
                 {message.content}
               </div>
@@ -134,7 +135,7 @@ const Chat = () => {
 
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-card border border-border rounded-3xl px-6 py-4">
+              <div className="rounded-3xl px-6 py-4 border" style={{ backgroundColor: '#f2e6eb', borderColor: 'hsl(340 25% 30%)' }}>
                 <div className="flex space-x-2">
                   <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" />
                   <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce delay-100" />

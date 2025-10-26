@@ -41,6 +41,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "Successfully signed in.",
         });
+        sessionStorage.setItem("justLoggedIn", "true");
         navigate("/dashboard");
       } else {
         const { error } = await supabase.auth.signUp({
@@ -58,6 +59,7 @@ const Auth = () => {
           title: "Account created!",
           description: "Welcome to Remindly AI. Redirecting...",
         });
+        sessionStorage.setItem("justLoggedIn", "true");
         navigate("/dashboard");
       }
     } catch (error: any) {
@@ -134,7 +136,7 @@ const Auth = () => {
             >
               {isLogin ? (
                 <>
-                  Don't have an account?{" "}
+                  Don\'t have an account?{" "}
                   <span className="font-semibold text-primary">Sign Up</span>
                 </>
               ) : (
