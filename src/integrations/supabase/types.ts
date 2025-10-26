@@ -14,13 +14,168 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memories: {
+        Row: {
+          ai_summary: string | null
+          content: string | null
+          content_hash: string | null
+          created_at: string
+          embedding: string | null
+          extracted_text: string | null
+          file_path: string | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          memory_type: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_comment: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          content?: string | null
+          content_hash?: string | null
+          created_at?: string
+          embedding?: string | null
+          extracted_text?: string | null
+          file_path?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          memory_type: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_comment?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_summary?: string | null
+          content?: string | null
+          content_hash?: string | null
+          created_at?: string
+          embedding?: string | null
+          extracted_text?: string | null
+          file_path?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          memory_type?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_comment?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memories_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string | null
+          encrypted_api_key: string | null
+          id: number
+          selected_llm: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          encrypted_api_key?: string | null
+          id?: number
+          selected_llm?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          encrypted_api_key?: string | null
+          id?: number
+          selected_llm?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_memories: {
+        Args: {
+          match_count: number
+          match_threshold: number
+          query_embedding: string
+          request_user_id: string
+        }
+        Returns: {
+          extracted_text: string
+          file_path: string
+          id: string
+          similarity: number
+          user_comment: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
