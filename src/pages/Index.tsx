@@ -72,7 +72,7 @@ const Index = () => {
         }}>
             <ArrowRight className="w-5 h-5 text-primary" />
           </div>
-          <span className="absolute inset-0 flex items-center justify-center text-white text-base font-semibold">
+          <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-2xl">
             Continue
           </span>
         </div>
