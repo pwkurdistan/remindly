@@ -133,50 +133,59 @@ const Dashboard = () => {
     for (const file of Array.from(files)) {
       try {
         let processedFile = file;
+        
+        // Compress images
         if (file.type.startsWith('image/')) {
-            processedFile = await imageCompression(file, {
+          const options = {
             maxSizeMB: 1,
             maxWidthOrHeight: 1920,
-            useWebWorker: true,
-          });
+            useWebWorker: true
+          };
+          processedFile = await imageCompression(file, options);
         }
   
+        // Generate hash
         const hash = await getFileHash(processedFile);
   
-        const { error } = await supabase.functions.invoke("upload-memory", {
-          body: JSON.stringify({
-            file: {
-              data: Array.from(new Uint8Array(await processedFile.arrayBuffer())),
-              name: processedFile.name,
-              type: processedFile.type,
-            },
-            hash,
-            comment: "",
-            user_id: user.id,
-          }),
+        // Convert file to base64
+        const reader = new FileReader();
+        const fileData = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(processedFile);
+        });
+  
+        // Upload via edge function
+        const { data, error } = await supabase.functions.invoke('upload-memory', {
+          body: { 
+            fileData,
+            fileName: processedFile.name,
+            fileType: processedFile.type,
+            hash, 
+            comment: '', 
+            user_id: user.id 
+          }
         });
   
         if (error) {
-          if (error.context?.status === 409) {
-            toast({
-              variant: "destructive",
-              title: "Duplicate Memory",
-              description: `"${file.name}" has already been stored.`,
-            });
-          } else {
-            throw error;
-          }
+          console.error('Error uploading memory:', error);
+          toast({
+            variant: "destructive",
+            title: "Upload failed",
+            description: error.message || "Failed to upload memory",
+          });
         } else {
-            toast({
-                title: "Memory Stored",
-                description: `"${file.name}" has been successfully saved.`,
-            });
+          toast({
+            title: "Memory saved!",
+            description: `${processedFile.name} has been added to your memories.`,
+          });
         }
-      } catch (e: any) {
+      } catch (error) {
+        console.error('Error processing file:', error);
         toast({
           variant: "destructive",
-          title: "Upload Failed",
-          description: `Could not process "${file.name}": ${e.message}`,
+          title: "Processing failed",
+          description: error.message || "Failed to process file",
         });
       }
     }

@@ -1,1 +1,7 @@
 project_id = "vnopzxwkxbvqhuihwzmb"
+
+[functions.upload-memory]
+verify_jwt = false
+
+[functions.chat-memory]
+verify_jwt = false
