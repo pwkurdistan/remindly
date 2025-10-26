@@ -7,16 +7,20 @@ import { Grid3x3, Search, Bell, Image as ImageIcon, Video, Play, Folder, Plus, H
 import { useToast } from "@/hooks/use-toast";
 import heroBrain from "@/assets/hero-brain.png";
 import memoryIcon from "@/assets/memory-icon.png";
-
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       setUser(session?.user ?? null);
       setLoading(false);
       if (!session) {
@@ -25,58 +29,41 @@ const Dashboard = () => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (!session) {
         navigate("/auth");
       }
     });
-
     return () => subscription.unsubscribe();
   }, [navigate]);
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast({
       title: "Signed out",
-      description: "You have been successfully signed out.",
+      description: "You have been successfully signed out."
     });
     navigate("/auth");
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+    return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse">Loading...</div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background pb-24">
+  return <div className="min-h-screen bg-background pb-24">
       {/* Top Navigation */}
       <nav className="px-6 pt-6 pb-4">
         <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-2xl w-12 h-12 bg-card hover:bg-card/80"
-          >
+          <Button variant="ghost" size="icon" className="rounded-2xl w-12 h-12 bg-card hover:bg-card/80">
             <Grid3x3 className="w-5 h-5 text-foreground" />
           </Button>
           <div className="flex items-center space-x-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full w-11 h-11 bg-card hover:bg-card/80"
-            >
-              <Search className="w-5 h-5 text-foreground" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full w-11 h-11 bg-card hover:bg-card/80"
-            >
+            
+            <Button variant="ghost" size="icon" className="rounded-full w-11 h-11 bg-card hover:bg-card/80">
               <Bell className="w-5 h-5 text-foreground" />
             </Button>
           </div>
@@ -108,10 +95,7 @@ const Dashboard = () => {
                   <span>16 Videos</span>
                 </div>
               </div>
-              <Button
-                size="icon"
-                className="rounded-full w-14 h-14 bg-[#FF69B4] hover:bg-[#FF69B4]/90 text-white shadow-lg"
-              >
+              <Button size="icon" className="rounded-full w-14 h-14 bg-[#FF69B4] hover:bg-[#FF69B4]/90 text-white shadow-lg">
                 <Play className="w-6 h-6 fill-white" />
               </Button>
             </div>
@@ -200,10 +184,7 @@ const Dashboard = () => {
           {/* Center Add Button */}
           <div className="absolute -top-7 left-1/2 transform -translate-x-1/2">
             <div className="bg-background rounded-full p-1.5">
-              <Button
-                size="icon"
-                className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-glow"
-              >
+              <Button size="icon" className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-glow">
                 <Plus className="w-7 h-7 text-white" />
               </Button>
             </div>
@@ -224,8 +205,6 @@ const Dashboard = () => {
           </div>
         </div>
       </nav>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
