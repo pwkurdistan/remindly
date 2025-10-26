@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { OpenAI } from "https://esm.sh/openai";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -21,23 +20,29 @@ serve(async (req) => {
     const { messages, user_id } = await req.json();
     const latestMessage = messages[messages.length - 1].content;
 
-    // 1. Get user settings for LLM and API key
-    const { data: userSettings } = await supabase
-      .from("user_settings")
-      .select("*")
-      .eq("user_id", user_id)
-      .single();
+    // 1. Generate an embedding for the user's question using Lovable AI
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    
+    // For embeddings, we still need OpenAI since Lovable AI doesn't support embeddings
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is required for embeddings");
+    }
 
-    const selectedModel = userSettings?.selected_llm || "gemma-3-27b-it";
-    const apiKey = userSettings?.encrypted_api_key || Deno.env.get("GEMMA_API_KEY");
-    const openai = new OpenAI({ apiKey });
-
-    // 2. Generate an embedding for the user's question
-    const embeddingResponse = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: latestMessage,
+    const embeddingResponse = await fetch("https://api.openai.com/v1/embeddings", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "text-embedding-3-small",
+        input: latestMessage,
+      }),
     });
-    const query_embedding = embeddingResponse.data[0].embedding;
+    
+    const embeddingData = await embeddingResponse.json();
+    const query_embedding = embeddingData.data[0].embedding;
 
     // 3. Find relevant memories
     const { data: relevantMemories } = await supabase.rpc("match_memories", {
@@ -66,18 +71,31 @@ serve(async (req) => {
     ${context || "No relevant memories found."}
     `;
 
-    // 5. Call the selected LLM
-    const response = await openai.chat.completions.create({
-      model: selectedModel,
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...messages,
-      ],
+    // 5. Call Lovable AI with Gemini
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messages,
+        ],
+      }),
     });
 
-    const aiResponse = response.choices[0].message.content || "I'm here to help with your memories!";
+    if (!aiResponse.ok) {
+      const errorData = await aiResponse.json();
+      throw new Error(errorData.error || "Failed to get AI response");
+    }
 
-    return new Response(JSON.stringify({ response: aiResponse }), {
+    const aiData = await aiResponse.json();
+    const responseText = aiData.choices[0].message.content || "I'm here to help with your memories!";
+
+    return new Response(JSON.stringify({ response: responseText }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
