@@ -50,9 +50,7 @@ const Index = () => {
 
         {/* Hero Text */}
         <div className="space-y-3 animate-fade-in">
-          <h1 className="text-5xl font-fredoka font-bold text-white tracking-tight">
-            Remindly
-          </h1>
+          <h1 className="text-5xl font-fredoka font-bold text-white tracking-tight">Remindly AI</h1>
           <p className="text-white/90 text-sm leading-relaxed px-6 font-medium">
             Store, organize, and recall your memories instantly with AI. Upload photos, documents, and notes.
           </p>
