@@ -17,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import imageCompression from 'browser-image-compression';
 
 const Dashboard = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -113,14 +114,71 @@ const Dashboard = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const getFileHash = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files && files.length > 0) {
-      toast({
-        title: "Files uploaded",
-        description: `${files.length} file(s) selected successfully.`,
-      });
-      // Here you would handle the actual file upload to Supabase storage
+    if (!files || files.length === 0 || !user) return;
+  
+    toast({
+      title: "Processing memories...",
+      description: `Analyzing ${files.length} file(s). Please wait.`,
+    });
+  
+    for (const file of Array.from(files)) {
+      try {
+        let processedFile = file;
+        if (file.type.startsWith('image/')) {
+            processedFile = await imageCompression(file, {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          });
+        }
+  
+        const hash = await getFileHash(processedFile);
+  
+        const { error } = await supabase.functions.invoke("upload-memory", {
+          body: JSON.stringify({
+            file: {
+              data: Array.from(new Uint8Array(await processedFile.arrayBuffer())),
+              name: processedFile.name,
+              type: processedFile.type,
+            },
+            hash,
+            comment: "",
+            user_id: user.id,
+          }),
+        });
+  
+        if (error) {
+          if (error.context?.status === 409) {
+            toast({
+              variant: "destructive",
+              title: "Duplicate Memory",
+              description: `"${file.name}" has already been stored.`,
+            });
+          } else {
+            throw error;
+          }
+        } else {
+            toast({
+                title: "Memory Stored",
+                description: `"${file.name}" has been successfully saved.`,
+            });
+        }
+      } catch (e: any) {
+        toast({
+          variant: "destructive",
+          title: "Upload Failed",
+          description: `Could not process "${file.name}": ${e.message}`,
+        });
+      }
     }
   };
 
@@ -129,14 +187,7 @@ const Dashboard = () => {
   };
 
   const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      toast({
-        title: "Photo captured",
-        description: "Photo captured successfully.",
-      });
-      // Here you would handle the actual photo upload to Supabase storage
-    }
+    handleFileChange(event);
   };
 
   const handleChatbotClick = () => {

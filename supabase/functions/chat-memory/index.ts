@@ -1,4 +1,11 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { OpenAI } from "https://esm.sh/openai";
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,80 +18,72 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const { messages, user_id } = await req.json();
+    const latestMessage = messages[messages.length - 1].content;
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
+    // 1. Get user settings for LLM and API key
+    const { data: userSettings } = await supabase
+      .from("user_settings")
+      .select("*")
+      .eq("user_id", user_id)
+      .single();
 
-    const systemPrompt = `You are Remindly AI, an intelligent memory assistant. Your role is to help users organize, store, and recall their memories including photos, documents, and text notes. 
+    const selectedModel = userSettings?.selected_llm || "gemma-3-27b-it";
+    const apiKey = userSettings?.encrypted_api_key || Deno.env.get("GEMMA_API_KEY");
+    const openai = new OpenAI({ apiKey });
 
-When users ask you questions:
-- Be friendly and conversational
-- Help them remember stored information
-- Suggest ways to organize their memories
-- Ask clarifying questions when needed
+    // 2. Generate an embedding for the user's question
+    const embeddingResponse = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: latestMessage,
+    });
+    const query_embedding = embeddingResponse.data[0].embedding;
 
-Keep your responses concise and helpful.`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
-      }),
+    // 3. Find relevant memories
+    const { data: relevantMemories } = await supabase.rpc("match_memories", {
+      query_embedding,
+      match_threshold: 0.5,
+      match_count: 5,
+      request_user_id: user_id,
     });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
-          {
-            status: 429,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Payment required. Please add credits to continue." }),
-          {
-            status: 402,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
+    // 4. Construct a rich prompt
+    const context = relevantMemories.map(mem => `
+      - Memory: "${mem.extracted_text}" (Comment: ${mem.user_comment || 'none'})
+      - Source File: ${mem.file_path}
+    `).join('\n');
 
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI gateway error");
-    }
+    const systemPrompt = `You are Remindly AI, a friendly and intelligent memory assistant.
+    - Your user is having a conversation with you about their memories.
+    - Below is a list of memories that might be relevant to their latest message.
+    - Use this information to answer their question thoughtfully and accurately.
+    - If you reference a memory that has a "Source File," you MUST provide a clickable link to it.
+    - Format the link like this: [link to source](storage_url)
+    - The base URL for storage is: ${Deno.env.get("SUPABASE_URL")}/storage/v1/object/public/memories/
+    - ALWAYS be helpful and friendly.
 
-    const data = await response.json();
-    const aiResponse = data.choices?.[0]?.message?.content || "I'm here to help with your memories!";
+    Relevant Memories:
+    ${context || "No relevant memories found."}
+    `;
 
-    return new Response(
-      JSON.stringify({ response: aiResponse }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    // 5. Call the selected LLM
+    const response = await openai.chat.completions.create({
+      model: selectedModel,
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages,
+      ],
+    });
+
+    const aiResponse = response.choices[0].message.content || "I'm here to help with your memories!";
+
+    return new Response(JSON.stringify({ response: aiResponse }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error("Chat error:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

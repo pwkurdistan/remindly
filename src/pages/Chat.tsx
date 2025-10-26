@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Brain, Send, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from 'react-markdown';
+import rewindLogo from "@/assets/rewind-logo.png";
 
 interface Message {
   role: "user" | "assistant";
@@ -44,7 +46,7 @@ const Chat = () => {
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || !user) return;
 
     const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
@@ -53,7 +55,10 @@ const Chat = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("chat-memory", {
-        body: { messages: [...messages, userMessage] },
+        body: { 
+          messages: [...messages, userMessage],
+          user_id: user.id 
+        },
       });
 
       if (error) throw error;
@@ -76,7 +81,7 @@ const Chat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f2e6eb' }}>
       {/* Header */}
       <nav className="bg-card border-b border-border px-6 py-4">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
@@ -86,11 +91,11 @@ const Chat = () => {
             onClick={() => navigate("/dashboard")}
             className="rounded-full"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 text-primary-foreground" />
           </Button>
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 flex items-center justify-center bg-primary rounded-full">
-              <Brain className="w-5 h-5 text-primary-foreground" />
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img src={rewindLogo} alt="Remindly AI" className="w-8 h-8 object-contain" />
             </div>
             <h1 className="text-2xl font-pacifico text-foreground">Remindly AI</h1>
           </div>
@@ -104,12 +109,12 @@ const Chat = () => {
           {messages.length === 0 && (
             <div className="text-center py-20">
               <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                <Brain className="w-10 h-10 text-primary-foreground" />
+                 <img src={rewindLogo} alt="Remindly AI" className="w-12 h-12 object-contain" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 Start a Conversation
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-gray-600">
                 Ask me anything about your stored memories
               </p>
             </div>
@@ -128,7 +133,7 @@ const Chat = () => {
                 }`}
                 style={message.role === "assistant" ? { backgroundColor: '#f2e6eb', borderColor: 'hsl(340 25% 30%)' } : {}}
               >
-                {message.content}
+                <ReactMarkdown>{message.content}</ReactMarkdown>
               </div>
             </div>
           ))}
