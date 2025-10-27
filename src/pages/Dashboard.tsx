@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [showTalkBubble, setShowTalkBubble] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [memories, setMemories] = useState<any[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -32,6 +33,20 @@ const Dashboard = () => {
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const fetchMemories = async (userId: string) => {
+      const { data, error } = await supabase
+        .from('memories')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching memories:', error);
+      } else {
+        setMemories(data);
+      }
+    };
+
     const handleClickOutside = (event: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setShowProfileMenu(false);
@@ -44,6 +59,8 @@ const Dashboard = () => {
       setUser(session?.user ?? null);
       if (!session) {
         navigate("/auth");
+      } else {
+        fetchMemories(session.user.id);
       }
     });
 
@@ -53,6 +70,7 @@ const Dashboard = () => {
       if (!session) {
         navigate("/auth");
       } else {
+        fetchMemories(session.user.id);
         const justLoggedIn = sessionStorage.getItem('justLoggedIn');
         if (justLoggedIn) {
           setShowTalkBubble(true);
@@ -201,6 +219,10 @@ const Dashboard = () => {
     navigate("/chat");
   };
 
+  const imageCount = memories.filter(m => m.file_type.startsWith('image/')).length;
+  const documentCount = memories.filter(m => !m.file_type.startsWith('image/')).length;
+  const recentImages = memories.filter(m => m.file_type.startsWith('image/')).slice(0, 2);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -260,11 +282,11 @@ const Dashboard = () => {
               <div className="flex items-center space-x-4 text-white/90 text-sm mb-6">
                 <div className="flex items-center space-x-2">
                   <ImageIcon className="w-4 h-4" />
-                  <span>132 Images</span>
+                  <span>{imageCount} Images</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Video className="w-4 h-4" />
-                  <span>16 Videos</span>
+                  <Folder className="w-4 h-4" />
+                  <span>{documentCount} Documents</span>
                 </div>
               </div>
               <Button size="icon" className="rounded-full w-14 h-14 bg-[#FF69B4] hover:bg-[#FF69B4]/90 text-white shadow-lg">
@@ -275,10 +297,10 @@ const Dashboard = () => {
             {/* Tilted Photo Cards */}
             <div className="absolute right-6 top-8 flex space-x-3">
               <div className="w-28 h-36 bg-[#C4787E] rounded-3xl overflow-hidden transform rotate-12 shadow-lg">
-                <img src={heroBrain} alt="" className="w-full h-full object-cover" />
+                <img src={recentImages[0] ? `${supabase.storage.from('memories').getPublicUrl(recentImages[0].file_path).data.publicUrl}` : heroBrain} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="w-28 h-36 bg-card rounded-3xl overflow-hidden transform rotate-6 shadow-lg -mt-4">
-                <img src={memoryIcon} alt="" className="w-full h-full object-cover" />
+                <img src={recentImages[1] ? `${supabase.storage.from('memories').getPublicUrl(recentImages[1].file_path).data.publicUrl}` : memoryIcon} alt="" className="w-full h-full object-cover" />
               </div>
             </div>
           </div>

@@ -16,24 +16,32 @@ serve(async (req) => {
   }
 
   try {
+    // API Key Checks
+    const GOOGLE_API_KEY = Deno.env.get("GOOGLE_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!GOOGLE_API_KEY) throw new Error("GOOGLE_API_KEY is not configured.");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured.");
+
     const { messages, user_id } = await req.json();
     const latestMessage = messages[messages.length - 1].content;
 
-    // 1. Get user settings for LLM and API key
-    const { data: userSettings } = await supabase.from("user_settings").select("*").eq("user_id", user_id).single();
+    // 1. Get user settings for LLM and API key (now resilient)
+    const { data: userSettings, error: settingsError } = await supabase
+        .from("user_settings")
+        .select("*")
+        .eq("user_id", user_id);
+    
+    if (settingsError) throw settingsError;
 
-    const selectedModel = userSettings?.selected_llm || "gemma-3-27b-it";
-    const apiKey = userSettings?.encrypted_api_key || Deno.env.get("LOVABLE_API_KEY");
+    const selectedModel = userSettings?.[0]?.selected_llm || "gemma-3-27b-it";
+    const apiKey = userSettings?.[0]?.encrypted_api_key || LOVABLE_API_KEY;
+    
     const openai = new OpenAI({
       apiKey,
       baseURL: "https://ai.gateway.lovable.dev/v1",
     });
 
     // 2. Generate an embedding for the user's question using Google's Gemini API
-    const GOOGLE_API_KEY = Deno.env.get("GOOGLE_API_KEY");
-    if (!GOOGLE_API_KEY) {
-      throw new Error("GOOGLE_API_KEY not configured");
-    }
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({ model: "embedding-001" });
     const embeddingResponse = await model.embedContent(latestMessage);
