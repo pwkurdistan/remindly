@@ -51,10 +51,10 @@ serve(async (req) => {
     });
 
     // 4. Construct a rich prompt
-    const context = relevantMemories.map(mem => `
+    const context = relevantMemories?.map((mem: any) => `
       - Memory: "${mem.extracted_text}" (Comment: ${mem.user_comment || 'none'})
       - Source File: ${mem.file_path}
-    `).join('\n');
+    `).join('\n') || '';
 
     const systemPrompt = `You are Remindly AI, a friendly and intelligent memory assistant.
     - Your user is having a conversation with you about their memories.
@@ -84,7 +84,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
