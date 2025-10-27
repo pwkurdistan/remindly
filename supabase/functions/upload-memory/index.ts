@@ -2,10 +2,7 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { OpenAI } from "https://esm.sh/openai";
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,24 +26,22 @@ serve(async (req) => {
 
     if (hashError) throw hashError;
     if (existingMemory && existingMemory.length > 0) {
-      return new Response(JSON.stringify({ message: "This memory already exists." }), { 
+      return new Response(JSON.stringify({ message: "This memory already exists." }), {
         status: 409,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // 2. Convert base64 to file buffer
-    const base64Data = fileData.split(',')[1];
-    const fileBuffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+    const base64Data = fileData.split(",")[1];
+    const fileBuffer = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
 
     // 3. Upload file to storage
     const filePath = `${user_id}/${Date.now()}_${fileName}`;
-    const { error: uploadError } = await supabase.storage
-      .from("memories")
-      .upload(filePath, fileBuffer, {
-        contentType: fileType,
-        upsert: false
-      });
+    const { error: uploadError } = await supabase.storage.from("memories").upload(filePath, fileBuffer, {
+      contentType: fileType,
+      upsert: false,
+    });
     if (uploadError) {
       console.error("Upload error:", uploadError);
       throw uploadError;
@@ -61,11 +56,11 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
-    const openai = new OpenAI({ 
+    const openai = new OpenAI({
       apiKey: LOVABLE_API_KEY,
       baseURL: "https://ai.gateway.lovable.dev/v1",
     });
-    
+
     const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small", // This model is supported by the gateway
       input: `${comment}\n${extracted_text}`,
@@ -87,15 +82,15 @@ serve(async (req) => {
       throw insertError;
     }
 
-    return new Response(JSON.stringify({ message: "Memory uploaded successfully." }), { 
+    return new Response(JSON.stringify({ message: "Memory uploaded successfully." }), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Error in upload-memory:", error);
-    return new Response(JSON.stringify({ error: error.message }), { 
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
