@@ -61,10 +61,21 @@ serve(async (req) => {
       baseURL: "https://ai.gateway.lovable.dev/v1",
     });
 
-    const embeddingResponse = await openai.embeddings.create({
-      model: "text-embedding-3-small", // This model is supported by the gateway
-      input: `${comment}\n${extracted_text}`,
-    });
+    let embeddingResponse;
+    try {
+      embeddingResponse = await openai.embeddings.create({
+        model: "text-embedding-3-small",
+        input: `${comment}\n${extracted_text}`,
+      });
+    } catch (embeddingError) {
+      console.error("Embedding error details:", {
+        message: embeddingError instanceof Error ? embeddingError.message : String(embeddingError),
+        status: (embeddingError as any).status,
+        response: (embeddingError as any).response,
+        input: `${comment}\n${extracted_text}`,
+      });
+      throw new Error(`Embedding generation failed: ${embeddingError instanceof Error ? embeddingError.message : 'Unknown error'}`);
+    }
     const embedding = embeddingResponse.data[0].embedding;
 
     // 6. Save the memory to the database
