@@ -26,7 +26,7 @@ serve(async (req) => {
     const chatModel = genAI.getGenerativeModel({ model: "gemma-3-27b-it" });
 
     // 1. Generate an embedding for the user's question
-    const embeddingResponse = await embeddingModel.embedContent(latestMessage, { outputDimensionality: 768 });
+    const embeddingResponse = await embeddingModel.embedContent(latestMessage);
     const query_embedding = embeddingResponse.embedding.values;
 
     // 2. Find relevant memories

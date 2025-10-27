@@ -57,8 +57,8 @@ serve(async (req) => {
     }
 
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
-    const embeddingResponse = await model.embedContent(`${comment}\n${extracted_text}`, { outputDimensionality: 768 });
+    const model = genAI.getGenerativeModel({ model: "models/text-embedding-004" });
+    const embeddingResponse = await model.embedContent(`${comment}\n${extracted_text}`);
     const embedding = embeddingResponse.embedding.values;
 
     // 6. Save the memory to the database
