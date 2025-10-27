@@ -50,33 +50,43 @@ serve(async (req) => {
     // 4. Extract text from the file (OCR) - Using a placeholder for now
     const extracted_text = `File uploaded: ${fileName}`;
 
-    // 5. Generate a vector embedding using Lovable AI Gateway
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY not configured");
+    // 5. Generate a vector embedding using OpenAI directly (Lovable AI Gateway doesn't support embeddings)
+    // We'll use a direct OpenAI API call instead
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY not configured - cannot generate embeddings");
+      return new Response(JSON.stringify({ error: "OpenAI API key not configured. Please add your OpenAI API key to enable memory search functionality." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const openai = new OpenAI({
-      apiKey: LOVABLE_API_KEY,
-      baseURL: "https://ai.gateway.lovable.dev/v1",
-    });
-
-    let embeddingResponse;
+    let embedding;
     try {
-      embeddingResponse = await openai.embeddings.create({
-        model: "text-embedding-3-small",
-        input: `${comment}\n${extracted_text}`,
+      const embeddingResponse = await fetch("https://api.openai.com/v1/embeddings", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "text-embedding-3-small",
+          input: `${comment}\n${extracted_text}`,
+        }),
       });
+
+      if (!embeddingResponse.ok) {
+        const errorText = await embeddingResponse.text();
+        console.error("OpenAI embedding error:", errorText);
+        throw new Error(`OpenAI API error: ${embeddingResponse.status} - ${errorText}`);
+      }
+
+      const embeddingData = await embeddingResponse.json();
+      embedding = embeddingData.data[0].embedding;
     } catch (embeddingError) {
-      console.error("Embedding error details:", {
-        message: embeddingError instanceof Error ? embeddingError.message : String(embeddingError),
-        status: (embeddingError as any).status,
-        response: (embeddingError as any).response,
-        input: `${comment}\n${extracted_text}`,
-      });
-      throw new Error(`Embedding generation failed: ${embeddingError instanceof Error ? embeddingError.message : 'Unknown error'}`);
+      console.error("Embedding generation failed:", embeddingError);
+      throw new Error(`Failed to generate embedding: ${embeddingError instanceof Error ? embeddingError.message : 'Unknown error'}`);
     }
-    const embedding = embeddingResponse.data[0].embedding;
 
     // 6. Save the memory to the database
     const { error: insertError } = await supabase.from("memories").insert({
