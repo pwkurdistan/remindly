@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { OpenAI } from "https://esm.sh/openai";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -35,12 +36,15 @@ serve(async (req) => {
       baseURL: "https://ai.gateway.lovable.dev/v1",
     });
 
-    // 2. Generate an embedding for the user's question
-    const embeddingResponse = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: latestMessage,
-    });
-    const query_embedding = embeddingResponse.data[0].embedding;
+    // 2. Generate an embedding for the user's question using Google's Gemini API
+    const GOOGLE_API_KEY = Deno.env.get("GOOGLE_API_KEY");
+    if (!GOOGLE_API_KEY) {
+      throw new Error("GOOGLE_API_KEY not configured");
+    }
+    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "embedding-001" });
+    const embeddingResponse = await model.embedContent(latestMessage);
+    const query_embedding = embeddingResponse.embedding.values;
 
     // 3. Find relevant memories
     const { data: relevantMemories } = await supabase.rpc("match_memories", {
@@ -69,7 +73,7 @@ serve(async (req) => {
     ${context || "No relevant memories found."}
     `;
 
-    // 5. Call the selected LLM
+    // 5. Call the selected LLM via the Lovable AI Gateway
     const response = await openai.chat.completions.create({
       model: selectedModel,
       messages: [
