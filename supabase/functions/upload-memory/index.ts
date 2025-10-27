@@ -53,7 +53,7 @@ serve(async (req) => {
     }
 
     // 4. Extract text from the file (OCR) - Using a placeholder for now
-    const extracted_text = `Image uploaded: ${fileName}`;
+    const extracted_text = `File uploaded: ${fileName}`;
 
     // 5. Generate a vector embedding using Lovable AI Gateway
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");

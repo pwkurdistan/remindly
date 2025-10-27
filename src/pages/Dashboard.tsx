@@ -113,7 +113,7 @@ const Dashboard = () => {
   const handleFileUpload = () => {
     fileInputRef.current?.click();
   };
-
+  
   const getFileHash = async (file: File) => {
     const buffer = await file.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
@@ -134,7 +134,6 @@ const Dashboard = () => {
       try {
         let processedFile = file;
         
-        // Compress images
         if (file.type.startsWith('image/')) {
           const options = {
             maxSizeMB: 1,
@@ -144,10 +143,8 @@ const Dashboard = () => {
           processedFile = await imageCompression(file, options);
         }
   
-        // Generate hash
         const hash = await getFileHash(processedFile);
   
-        // Convert file to base64
         const reader = new FileReader();
         const fileData = await new Promise<string>((resolve, reject) => {
           reader.onload = () => resolve(reader.result as string);
@@ -155,7 +152,6 @@ const Dashboard = () => {
           reader.readAsDataURL(processedFile);
         });
   
-        // Upload via edge function
         const { data, error } = await supabase.functions.invoke('upload-memory', {
           body: { 
             fileData,
@@ -168,24 +164,26 @@ const Dashboard = () => {
         });
   
         if (error) {
-          console.error('Error uploading memory:', error);
-          toast({
-            variant: "destructive",
-            title: "Upload failed",
-            description: error.message || "Failed to upload memory",
-          });
+          if (error.context?.status === 409) {
+            toast({
+              variant: "destructive",
+              title: "Duplicate Memory",
+              description: `"${file.name}" has already been stored.`,
+            });
+          } else {
+            throw error;
+          }
         } else {
           toast({
             title: "Memory saved!",
             description: `${processedFile.name} has been added to your memories.`,
           });
         }
-      } catch (error) {
-        console.error('Error processing file:', error);
+      } catch (e: any) {
         toast({
           variant: "destructive",
-          title: "Processing failed",
-          description: error.message || "Failed to process file",
+          title: "Processing Failed",
+          description: `Could not process "${file.name}": ${e.message}`,
         });
       }
     }
