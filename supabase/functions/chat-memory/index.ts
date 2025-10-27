@@ -22,7 +22,7 @@ serve(async (req) => {
     const latestMessage = messages[messages.length - 1].content;
 
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-    const embeddingModel = genAI.getGenerativeModel({ model: "models/text-embedding-004" });
+    const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
     const chatModel = genAI.getGenerativeModel({ model: "gemma-3-27b-it" });
 
     // 1. Generate an embedding for the user's question
