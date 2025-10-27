@@ -26,10 +26,7 @@ serve(async (req) => {
     const chatModel = genAI.getGenerativeModel({ model: "gemma-3-27b-it" });
 
     // 1. Generate an embedding for the user's question
-    const embeddingResponse = await embeddingModel.embedContent(
-      latestMessage,
-      { outputDimensionality: 768 }
-    );
+    const embeddingResponse = await embeddingModel.embedContent(latestMessage, { outputDimensionality: 768 });
     const query_embedding = embeddingResponse.embedding.values;
 
     // 2. Find relevant memories
@@ -41,7 +38,7 @@ serve(async (req) => {
     });
 
     // 3. Construct a rich prompt
-    const context = relevantMemories?.map((mem: any) => `...`).join('\n') || '';
+    const context = relevantMemories?.map((mem: any) => `...`).join("\n") || "";
     const systemPrompt = `You are Remindly AI, a friendly and intelligent memory assistant.
     - Your user is having a conversation with you about their memories.
     - Below is a list of memories that might be relevant to their latest message.
@@ -61,12 +58,12 @@ serve(async (req) => {
         { role: "user", parts: [{ text: systemPrompt }] },
         { role: "model", parts: [{ text: "Understood. I will follow these instructions." }] },
         ...messages.map((m: any) => ({
-            role: m.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: m.content }]
-        }))
-      ]
+          role: m.role === "assistant" ? "model" : "user",
+          parts: [{ text: m.content }],
+        })),
+      ],
     });
-    
+
     const result = await chat.sendMessage(latestMessage);
     const aiResponse = result.response.text() || "I'm here to help with your memories!";
 
