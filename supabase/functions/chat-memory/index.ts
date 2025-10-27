@@ -48,12 +48,17 @@ serve(async (req) => {
     const query_embedding = embeddingResponse.embedding.values;
 
     // 3. Find relevant memories
-    const { data: relevantMemories } = await supabase.rpc("match_memories", {
+    const { data: relevantMemories, error: memoryError } = await supabase.rpc("match_memories", {
       query_embedding,
       match_threshold: 0.5,
       match_count: 5,
       request_user_id: user_id,
     });
+
+    if (memoryError) {
+      console.error("Error fetching memories:", memoryError);
+      throw new Error(`Memory search failed: ${memoryError.message}`);
+    }
 
     // 4. Construct a rich prompt
     const context =
