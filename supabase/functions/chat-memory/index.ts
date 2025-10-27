@@ -27,15 +27,15 @@ serve(async (req) => {
 
     // 1. Get user settings for LLM and API key (now resilient)
     const { data: userSettings, error: settingsError } = await supabase
-        .from("user_settings")
-        .select("*")
-        .eq("user_id", user_id);
-    
+      .from("user_settings")
+      .select("*")
+      .eq("user_id", user_id);
+
     if (settingsError) throw settingsError;
 
     const selectedModel = userSettings?.[0]?.selected_llm || "gemma-3-27b-it";
     const apiKey = userSettings?.[0]?.encrypted_api_key || LOVABLE_API_KEY;
-    
+
     const openai = new OpenAI({
       apiKey,
       baseURL: "https://ai.gateway.lovable.dev/v1",
